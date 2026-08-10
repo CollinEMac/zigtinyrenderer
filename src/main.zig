@@ -8,18 +8,38 @@ fn writePixel(fb: *zigimg.Image, x: usize, y: usize, color: zigimg.color.Rgb24) 
 }
 
 fn line(fb: *zigimg.Image, ax: f32, ay: f32, bx: f32, by: f32, color: zigimg.color.Rgb24) void {
-    if (ax > bx) { //make it left-to-right
-        line(fb, bx, by, ax, ay, color);
+    const steep: bool = @abs(ax-bx) < @abs(ay-by);
+
+    var x0 = ax;
+    var y0 = ay;
+    var x1 = bx;
+    var y1 = by;
+
+    if (steep) {
+        // transpose the image
+        std.mem.swap(f32, &x0, &y0);
+        std.mem.swap(f32, &x1, &y1);
     }
-    line(fb, ax, ay, bx, by, color);
+    if (x0 > x1) { // make it left-to-right
+        std.mem.swap(f32, &x0, &x1);
+        std.mem.swap(f32, &y0, &y1);
+    }
+
+    drawLine(fb, x0, y0, x1, y1, color, steep);
 }
 
-fn drawLine(fb: *zigimg.Image, ax: f32, ay: f32, bx: f32, by: f32, color: zigimg.color.Rgb24) void {
+fn drawLine(fb: *zigimg.Image, ax: f32, ay: f32, bx: f32, by: f32, color: zigimg.color.Rgb24, steep: bool) void {
     var x: f32 = ax;
     while (x < bx) : (x += 1.0){
         const t: f32 = (x-ax) / (bx-ax);
         const y: usize = @intFromFloat(std.math.round(ay + (by-ay)*t));
-        writePixel(fb, @as(usize, @intFromFloat(x)), y, color);
+        const ix: usize = @intFromFloat(x);
+        if (steep) {
+            // un-transpose again for writing the pixel
+            writePixel(fb, y, ix, color);
+        } else {
+            writePixel(fb, ix, y, color);
+        }
     }
 }
 

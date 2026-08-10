@@ -8,6 +8,13 @@ fn writePixel(fb: *zigimg.Image, x: usize, y: usize, color: zigimg.color.Rgb24) 
 }
 
 fn line(fb: *zigimg.Image, ax: f32, ay: f32, bx: f32, by: f32, color: zigimg.color.Rgb24) void {
+    if (ax > bx) { //make it left-to-right
+        line(fb, bx, by, ax, ay, color);
+    }
+    line(fb, ax, ay, bx, by, color);
+}
+
+fn drawLine(fb: *zigimg.Image, ax: f32, ay: f32, bx: f32, by: f32, color: zigimg.color.Rgb24) void {
     var x: f32 = ax;
     while (x < bx) : (x += 1.0){
         const t: f32 = (x-ax) / (bx-ax);

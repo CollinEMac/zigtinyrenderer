@@ -8,11 +8,11 @@ fn writePixel(fb: *zigimg.Image, x: usize, y: usize, color: zigimg.color.Rgb24) 
 }
 
 fn line(fb: *zigimg.Image, ax: f32, ay: f32, bx: f32, by: f32, color: zigimg.color.Rgb24) void {
-    var t: f32 = 0.0;
-    while (t < 1.0) : (t+= 0.02){
-        const x: usize = @intFromFloat(std.math.round(ax + (bx-ax)*t));
+    var x: f32 = ax;
+    while (x < bx) : (x += 1.0){
+        const t: f32 = (x-ax) / (bx-ax);
         const y: usize = @intFromFloat(std.math.round(ay + (by-ay)*t));
-        writePixel(fb, x, y, color);
+        writePixel(fb, @as(usize, @intFromFloat(x)), y, color);
     }
 }
 
